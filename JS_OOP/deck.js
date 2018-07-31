@@ -14,10 +14,10 @@ class Deck{
         this.deck = []
         let nums = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King"]
         let suits = ["Hearts", "Diamonds", "Spades", "Clubs"];
-        for (let i = 0; i < nums.length; i++){
-            for (let j = 0; j < suits.length; j++){
-                if (i >= 9) this.deck.push(new Card(suits[j], nums[i], 10))
-                else this.deck.push(new Card(suits[j], nums[i], i+1))
+        for (let i = 0; i < suits.length; i++){
+            for (let j = 0; j < nums.length; j++){
+                if (j >= 9) this.deck.push(new Card(suits[i], nums[j], 10))
+                else this.deck.push(new Card(suits[i], nums[j], j+1))
             }
         }
     }
@@ -41,6 +41,9 @@ class Deck{
     deal(){
         return this.deck.pop();
     }
+    display(){
+        for (let x of this.deck) console.log(x.num + " of " + x.suit);
+    }
 }
 
 class Player{
@@ -60,7 +63,10 @@ class Player{
 
 let cards = new Deck();
 let kenny = new Player("Kenny");
-cards.shuffle();
-kenny.take(cards).take(cards);
-console.log(kenny.hand);
+
+cards.display();
+
+// cards.shuffle();
+// kenny.take(cards).take(cards);
+// console.log(kenny.hand);
 

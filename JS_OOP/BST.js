@@ -32,8 +32,38 @@ BST.prototype.insert = function(val){
     return this;
 }
 
-BST.prototype.delete = function(val){
-    if (!this.root) return false;
+BST.prototype.findMin = function(node){
+    if (node){
+        while (node.left) node = node.left;
+        return node.value;
+    }
+    return null;
+}
+
+// helper method that calls the removeInner with a given value
+BST.prototype.remove = function(val){
+    // root is re-initialized with root of a modified tree
+    this.root = this.removeInner(val, this.root);
+}
+
+// Method to remove node with a given value. Recurrs over the tree to find the value and removes it
+BST.prototype.removeInner = function(val, node){
+    // Only continues if the node exists
+    if (node){
+        // If value to be deleted is less than root's value then move to the left subtree
+        if (val < node.value) node.left = this.removeInner(val, node.left);
+        // If value to be deleted is more than root's value then move to the right subtree
+        else if (val > node.value) node.right = this.removeInner(val, node.right);
+        // If value is equal to the root's value then delete this current node
+        else if (node.left && node.right){
+            // To delete node with 2 children, find the node with minimum value in right subtree and replace this node's value with minimum valued node
+            node.value = this.findMin(node.right)
+            node.right = this.removeInner(node.value, node.right);
+        }
+        // Changes the node to be removed to either its left or right, or null if it has no children
+        else node = node.left || node.right;
+    }
+    return node;
 }
 
 BST.prototype.preTraverse = function(node){
@@ -69,9 +99,12 @@ BST.prototype.depth = function(node){
 }
 
 let tree1 = new BST();
-tree1.insert(40).insert(20).insert(50).insert(25);
-tree1.orderTraverse(tree1.root);
-console.log(tree1.depth(tree1.root));
+tree1.insert(40).insert(20).insert(50).insert(25).insert(10);
+// tree1.orderTraverse(tree1.root);
+// console.log(tree1.depth(tree1.root));
+
+tree1.remove(20);
+console.log(tree1);
 
 // let tree2 = new BST();
 // tree2.insert(30);
