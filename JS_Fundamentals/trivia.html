@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Trivia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script>
+        function random(a) {
+            var j, x, i;
+            for (i = a.length - 1; i > 0; i--) {
+                j = Math.floor(Math.random() * (i + 1));
+                x = a[i];
+                a[i] = a[j];
+                a[j] = x;
+            }
+            return a;
+        }
+        $(document).ready(function(){
+            var points = 0;
+            $('#content').on('click', '.question', function(){
+                $(this).children('p').slideDown();
+                $(this).children('form').slideDown();
+                $(this).children('h2').hide();
+                $(this).css('height','unset');
+            })
+            $('#content').on('click','input', function(){
+                if($(this).attr('class')== 'correct') {
+                    points +=100;
+                    $('#header h2').html(points+' points')
+                    $(this).parent().parent().css('background-color','green');
+                }
+                else{
+                    points -=100;
+                    $('#header h2').html(points+' points')
+                    $(this).parent().parent().css('background-color','red');
+                }
+            })
+            var get = $.get("https://opentdb.com/api.php?amount=30&difficulty=easy&type=multiple", function(data) {
+                // console.log(data);
+                let questions = '', catList = [], questionsArr = [];
+                for(let i = 0; i<data.results.length; i++){
+                    if(catList.indexOf(data.results[i].category)== -1){
+                        catList.push(data.results[i].category);
+                        questions += '<div class="sub" id="'+data.results[i].category+'">';
+                        questions += '<div class="category">';
+                        questions += '<p>'+data.results[i].category+'</p>';
+                        questions += '</div>';
+                        questions += '</div>';
+                    }
+                    if(catList.length>4) break;
+                }
+                $('#content').html(questions);
+                for(let i = 0; i<data.results.length; i++){
+                    box = $('.sub').filter(function(){return this.id==data.results[i].category})
+                    if (box.attr('id') == data.results[i].category){
+                        questions = '';
+                        questions += '<div class="question">';
+                        questions += '<h2>100</h2>';
+                        questions += '<p>'+data.results[i].question+'</p>';
+                        questions += '<form>';
+                        questionsArr = data.results[i].incorrect_answers;
+                        questionsArr[3] = data.results[i].correct_answer;
+                        questionsArr = random(questionsArr);
+                        for(let j = 0; j<questionsArr.length; j++){                            
+                            if (data.results[i].correct_answer==questionsArr[j]) questions+= '<input type="radio" class="correct">'+questionsArr[j]+'<br>'
+                            else questions+= '<input type="radio">'+questionsArr[j]+'<br>'
+                        }
+                        questions += '</form></div>';
+                        if (box.children().length<5) box.append(questions);
+                    }
+                }  
+            })
+        });
+    </script>
+    <style>
+        #header {
+            height: 50px;
+            width: 94vw;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        #content{
+            display: flex;
+            flex-direction: row;
+            width: 96vw;
+            margin-top: 20px;
+        }
+        .sub{
+            margin: 20px;
+            width: 300px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+        .category{
+            background-color: goldenrod;
+            border-radius: 10px;
+            height:70px;
+            padding: 10px;
+        }
+        .question {
+            width: 200px;
+            height: 200px;
+            border: 2px solid black;
+            border-radius: 10px;
+            background-color: brown;
+            margin: 10px auto;
+            color: white;
+            padding: 10px;
+        }
+        .question p, .question form {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <a href="">Continue with new questions</a>
+            <h1>Trivia Night</h1>
+            <h2>0 points</h2>
+        </div>
+        <div id="content">
+
+        </div>
+    </div>
+</body>
+</html>

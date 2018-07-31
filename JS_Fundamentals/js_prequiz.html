@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+  <script
+src="https://code.jquery.com/jquery-3.3.1.min.js"
+integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+crossorigin="anonymous">
+</script>
+  <script>
+    $(document).ready(function(){
+      var favoritepokemon;
+      $.get("https://pokeapi.co/api/v2/pokemon/1/",function(data){
+        console.log(data)
+        favoritepokemon = data.name
+      })
+      console.log("My favorite:" + favoritepokemon);
+    })
+    var first = "vanilla latte"
+    var second = "cookie"
+    console.log(swap([first,second]))
+    function swap(items){
+      first = items[1]
+      var second = items[0]
+      return [first,second]
+    }
+    console.log(first,second) 
+  </script>
+</head>
+<body>
+
+</body>
+</html>

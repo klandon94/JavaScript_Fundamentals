@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    <script>
+        class Card {
+            constructor(value,suit,face,img){
+                this.value = value;
+                this.suit = suit;
+                this.face = face;
+                this.img = img;
+            }
+        }
+        class Deck {
+            constructor(){
+                this.cards = []
+                var faces = ['Ace','2','3','4','5','6','7','8','9','10','Jack','Queen','King']
+                var suits = ['Spades','Diamonds','Clubs','Hearts']
+                var imgs = ['s','d','c','h']
+                var imgf = ['1','2','3','4','5','6','7','8','9','10','j','q','k']
+                for (let i = 0; i<suits.length;i++){
+                    for (let j = 0; j<faces.length;j++){
+                        if (j > 9){
+                            this.cards.push(new Card(10,suits[i],faces[j],(imgs[i]+imgf[j])))
+                        }   
+                        else{
+                            this.cards.push(new Card(j+1,suits[i],faces[j],(imgs[i]+imgf[j])))
+                        }
+                    }
+                }
+            }
+            shuffle(){
+                var j, temp;
+                for (var i = this.cards.length - 1; i > 0; i--) {
+                    j = Math.floor(Math.random() * (i + 1));
+                    temp = this.cards[i];
+                    this.cards[i] = this.cards[j];
+                    this.cards[j] = temp;
+                }
+                return this.cards;
+            }
+            deal(){
+                return this.cards.pop();
+            }
+            show(){
+                for(let i =0; i<this.cards.length;i++){
+                    console.log(this.cards[i].face,"of",this.cards[i].suit)
+                }
+            }
+        }
+        class Player {
+            constructor(name, hand){
+                this.name = name;
+                this.hand = [];
+                this.win = '';
+                this.wins = 0;
+                this.lose = 0;
+            }
+            takeCard(deck) {
+                this.hand.push(deck.deal());
+            }
+            checkCards(){
+                var sum = 0;
+                var isAce = false;
+                for(let i = 0; i<this.hand.length;i++){
+                    if (this.hand[i].face == 'Ace'){
+                        isAce = true;
+                        sum+= this.hand[i].value
+                        continue
+                    }
+                    else{
+                        sum+= this.hand[i].value
+                    }
+                }
+                if (sum<22 && sum+10<22 && isAce){
+                    sum +=10;
+                }
+                return sum;
+            }
+            dealerPlay(deck){
+                while(this.checkCards()<17){
+                    this.takeCard(deck);
+                }
+            }
+            newGame(player2, deck){
+                this.hand= []
+                player2.hand = [];
+                this.takeCard(deck);
+                this.takeCard(deck);
+                player2.takeCard(deck);
+                player2.takeCard(deck);
+            }
+            highestCard(){
+                var high = 0 ;
+                for (let i = 0; i<this.hand.length;i++){
+                    if (this.hand[i]>high){
+                        high = this.hand[i]
+                    }
+                    else if (this.hand[i].face = 'Ace'){
+                        high = 11;
+                    }
+                }
+                return high
+            }
+            play(dealer){
+                var playerscore = this.checkCards()
+                var dealerscore = dealer.checkCards()
+                if(dealerscore==21){
+                    this.win = 'lose';
+                }
+                else if(playerscore==21){
+                    this.win = 'win';
+                }
+                else if (playerscore >21){
+                    this.win = 'lose';
+                }
+                else if (dealerscore >21 && playerscore <=21){
+                    this.win = 'win';
+                }
+                else if (playerscore>dealerscore){
+                    this.win = 'win';
+                }
+                else if (playerscore == dealerscore){
+                    if (this.hand.length>dealer.hand.length){
+                        this.win = 'lose'
+                    }
+                    else if (this.hand.length == dealer.hand.length){
+                        if (this.highestCard() >dealer.highestCard()){
+                            this.win = 'win'
+                        }
+                        else {
+                            this.win = 'lose'
+                        }
+                    }
+                    else{
+                        this.win = 'win'
+                    }
+                }
+                else {
+                    this.win ='lose';
+                }
+                if (this.win=='lose'){
+                    this.lose += 1
+                }
+                else {
+                    this.wins += 1
+                }
+            }
+        }
+        deck = new Deck;
+        player = new Player;
+        dealer = new Player;
+        $(document).ready( function(){
+            function drawscore(){
+                $('#score').html('Wins: '+player.wins+" Lose: "+player.lose)
+            }
+            function drawdealer(){
+                dealercards = ""
+                for(i in dealer.hand){
+                    dealercards += '<img src="'+dealer.hand[i].img+'.png">'
+                }
+                $('#dealer').html(dealercards) 
+                $('h3:first').html(dealer.checkCards())
+                player.play(dealer)
+                $('#tabletext').html('You '+player.win+'!')
+                drawscore();
+            }
+            $('#deal').click(function(){
+                if (player.hand.length>1&&player.win==""){
+                    return null;
+                }
+                $('h1').html('Dealer plays to 17') 
+                deck = new Deck;
+                deck.shuffle();
+                player.newGame(dealer, deck);
+                player.win = 0
+                playercards = '<img src="'+player.hand[0].img+'.png">'+'<img src="'+player.hand[1].img+'.png">'
+                dealercards = '<img src="'+dealer.hand[0].img+'.png">'+'<img src="b2fv.png" id="secret">'
+                $('#dealer').html(dealercards)                
+                $('#player').html(playercards)
+                $('h3:last').html(player.checkCards())
+                $('h3:first').html("") 
+                if (dealer.checkCards()==21){
+                    drawdealer();
+                }
+                else if (player.checkCards()==21){
+                    drawdealer();
+                }
+            })
+            $('#hit').click(function(){
+                if (player.win != ""|| player.hand.length<1){
+                    return null
+                }
+                player.takeCard(deck);
+                playercards = ""
+                for(i in player.hand){
+                    playercards += '<img src="'+player.hand[i].img+'.png">'
+                }
+                $('#player').html(playercards)
+                $('h3:last').html(player.checkCards())
+                if (player.checkCards()>=21){
+                    dealer.dealerPlay(deck);
+                    drawdealer()
+                }
+            })
+            $('#stay').click(function (){
+                if (player.win != "" || player.hand.length<1){
+                    return null
+                }
+                dealercards = ""
+                for(i in dealer.hand){
+                    dealercards += '<img src="'+dealer.hand[i].img+'.png">'
+                }
+                $('#dealer').html(dealercards) 
+                $('h3:first').html(dealer.checkCards()) 
+                dealer.dealerPlay(deck);
+                drawdealer()
+            })
+        })
+    </script>
+    <style>
+        #container{
+            width: 100vw;
+            margin-top: 10vh;
+            height:90vh;
+            display: flex;
+            justify-content: center;
+        }
+        #table{
+            height: 90%;
+            width: 75%;
+            background-color: green;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 2px solid black;
+            box-shadow: 4px 4px 10px rgb(94, 94, 94);
+            border-radius: 15px;
+        }
+        .place{
+            width: 100%;
+            height: 20%;
+            background-color: red;
+            display: flex;
+            justify-content: space-between;
+        }
+        .place:first-of-type{
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .place:last-of-type{
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        .space:nth-of-type(2){
+            display:flex;
+            justify-content: space-around;
+        }
+        .place:first{
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .space {
+            width: 33%;
+            height: 100%;
+        }
+        h2{
+            text-align: center;
+        }
+        h3{
+            margin: 20px;
+            text-align: right;
+        }
+        button {
+            width: 33.33%;
+            height: 100%;
+            background-color: gray;
+            font-size: 22px;
+            border: 1px solid rgb(104, 104, 104);
+        }
+        button:last-of-type{
+            border-bottom-right-radius: 15px;
+        }
+        #buttons{
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="table">
+            <div class="place">
+                <div class="space">
+                    <h3></h3>
+                </div>
+                <div class="space" id="dealer">
+                    
+                </div>
+                <div class="space">
+                    <h3 id="score"></h3>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <h3></h3>
+                <h1 id="tabletext">Dealer plays to 17</h1>
+                <h3></h3>
+            </div>
+            <div class="place">
+                <div class="space">
+                    <h3></h3>
+                </div>
+                <div class="space" id="player">
+
+                </div>
+                <div class="space" id="buttons">
+                    <button id="hit">Hit</button>
+                    <button id="stay">Stay</button>
+                    <button id="deal">Deal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
